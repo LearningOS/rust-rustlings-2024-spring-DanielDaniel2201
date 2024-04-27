@@ -2,7 +2,6 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -15,6 +14,7 @@ struct Node<T> {
 }
 
 impl<T> Node<T> {
+    // create a node with value `t` and `None` as next node
     fn new(t: T) -> Node<T> {
         Node {
             val: t,
@@ -29,13 +29,13 @@ struct LinkedList<T> {
     end: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Default for LinkedList<T> {
+impl<T: std::cmp::PartialOrd + Clone> Default for LinkedList<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T: std::cmp::PartialOrd + Clone> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -45,9 +45,13 @@ impl<T> LinkedList<T> {
     }
 
     pub fn add(&mut self, obj: T) {
+        // given obj, create a node containing it
         let mut node = Box::new(Node::new(obj));
+        // the node will be added to the end of the list so its next would be `None`
         node.next = None;
+        // wrap the raw pointer into an Option of NonNull
         let node_ptr = Some(unsafe { NonNull::new_unchecked(Box::into_raw(node)) });
+        // append the new node to the end of list depending on the list state (empty or not)
         match self.end {
             None => self.start = node_ptr,
             Some(end_ptr) => unsafe { (*end_ptr.as_ptr()).next = node_ptr },
@@ -69,14 +73,40 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
+	pub fn merge(list_a: LinkedList<T>, list_b: LinkedList<T>) -> Self
 	{
 		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+		let mut merged_list = LinkedList::new();
+        
+        let mut curr_node_a = list_a.start;
+        let mut curr_node_b = list_b.start;
+
+        // when both nodes is Some(..)
+        while curr_node_a.is_some() && curr_node_b.is_some() {
+            let val_a = unsafe { curr_node_a.unwrap().as_ref().val.clone() };
+            let val_b = unsafe { curr_node_b.unwrap().as_ref().val.clone() };
+            if val_a <= val_b {
+                merged_list.add(val_a);
+                curr_node_a = unsafe { (*curr_node_a.unwrap().as_ref()).next };
+            } else {
+                merged_list.add(val_b);
+                curr_node_b = unsafe { (*curr_node_b.unwrap().as_ref()).next };
+            }
         }
+
+        while curr_node_a.is_some() {
+            let val_a = unsafe { (*curr_node_a.unwrap().as_ref()).val.clone() };
+            merged_list.add(val_a);
+            curr_node_a = unsafe { (*curr_node_a.unwrap().as_ref()).next };
+        }
+
+        while curr_node_b.is_some() {
+            let val_b = unsafe { (*curr_node_b.unwrap().as_ref()).val.clone() };
+            merged_list.add(val_b);
+            curr_node_b = unsafe { (*curr_node_b.unwrap().as_ref()).next };
+        }
+
+        merged_list
 	}
 }
 
