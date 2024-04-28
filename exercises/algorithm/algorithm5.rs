@@ -35,13 +35,13 @@ impl Graph {
         while let Some(curr) = queue.pop_front() {
             visit_order.push(curr);
             visited.push(curr);
-            let neigb = self.adj[curr].clone();
+            let neigb = &self.adj[curr];
             for num in neigb {
                 if visited.contains(&num) {
                     continue;
                 }
-                visited.push(num);
-                queue.push_back(num);
+                visited.push(num.clone());
+                queue.push_back(num.clone());
             }   
         }
         visit_order

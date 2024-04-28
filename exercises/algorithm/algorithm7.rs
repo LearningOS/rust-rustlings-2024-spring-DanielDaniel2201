@@ -3,7 +3,6 @@
 	This question requires you to use a stack to achieve a bracket match
 */
 
-// I AM NOT DONE
 #[derive(Debug)]
 struct Stack<T> {
 	size: usize,
@@ -32,9 +31,12 @@ impl<T> Stack<T> {
 	}
 	fn pop(&mut self) -> Option<T> {
 		// TODO
-		self.size -= 1;
 		match self.data.pop() {
-			Some(value) => { return Some(value) },
+			Some(value) => {
+				self.size -= 1;
+				println!("now size: {}", self.size);
+				return Some(value);
+			},
 			None => return None,
 		}
 	}
@@ -77,7 +79,8 @@ impl<T: Clone> Iterator for IntoIter<T> {
 	type Item = T;
 	fn next(&mut self) -> Option<Self::Item> {
 		if !self.0.is_empty() {
-			self.0.size -= 1;self.0.data.pop()
+			self.0.size -= 1;
+			self.0.data.pop()
 		} 
 		else {
 			None
@@ -106,7 +109,24 @@ impl<'a, T> Iterator for IterMut<'a, T> {
 fn bracket_match(bracket: &str) -> bool
 {
 	//TODO
-	true
+	let lefts = ['(', '{', '['];
+	let rights = [')', '}', ']'];
+	let mut stack = Stack::new();
+
+	for char in bracket.chars() {
+		if lefts.contains(&char) {
+			stack.push(char.clone());
+		} else if rights.contains(&char) {
+			if stack.is_empty() { return false; }
+			match char {
+				')' => if stack.pop().unwrap() != '(' { return false; },
+				'}' => if stack.pop().unwrap() != '{' { return false; },
+				']' => if stack.pop().unwrap() != '[' { return false; },
+				_ => {}
+			}
+		}
+	}
+	stack.is_empty()
 }
 
 #[cfg(test)]

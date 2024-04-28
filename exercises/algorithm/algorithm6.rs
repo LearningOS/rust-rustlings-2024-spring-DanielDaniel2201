@@ -25,12 +25,12 @@ impl Graph {
         //TODO
         visit_order.push(v);
         visited.insert(v);
-        let neigb = self.adj[v].clone();
+        let neigb = &self.adj[v];
         for num in neigb {
             if visited.contains(&num) {
                 continue;
             }
-            self.dfs_util(num, visited, visit_order);
+            self.dfs_util(num.clone(), visited, visit_order);
         }
     }
 
